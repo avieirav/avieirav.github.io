@@ -1,0 +1,748 @@
+:root {
+    --bg-color: #fdf6e3;
+    --text-color: #657b83;
+    --accent-color: #073642;
+    --border-color: #93a1a1;
+    --header-bg: rgba(253, 246, 227, 0.95);
+    --code-bg: #eee8d5;
+    --font-size: 17px;
+    --max-width: 800px;
+}
+
+[data-theme="dark"] {
+    --bg-color: #002b36;
+    --text-color: #839496;
+    --accent-color: #fdf6e3;
+    --border-color: #073642;
+    --header-bg: rgba(0, 43, 54, 0.95);
+    --code-bg: #073642;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: var(--font-size);
+    line-height: 1.6;
+    color: var(--text-color);
+    background: var(--bg-color);
+    position: relative;
+    overflow-x: hidden;
+    animation: flicker 0.15s infinite;
+}
+
+@keyframes flicker {
+    0% { opacity: 0.97; }
+    50% { opacity: 1; }
+    100% { opacity: 0.98; }
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.07) 0px,
+        rgba(0, 0, 0, 0.07) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    pointer-events: none;
+    z-index: 9999;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg-color);
+    pointer-events: none;
+    z-index: 10000;
+    opacity: 0;
+}
+
+body.theme-changing::after {
+    animation: themeWave 0.6s ease-in-out;
+}
+
+@keyframes themeWave {
+    0% {
+        clip-path: inset(0 0 100% 0);
+        opacity: 1;
+    }
+    100% {
+        clip-path: inset(100% 0 0 0);
+        opacity: 0;
+    }
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--accent-color);
+}
+
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    z-index: 10;
+    backdrop-filter: blur(5px);
+}
+
+.header nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.nav-links a {
+    color: var(--text-color);
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+    color: var(--accent-color);
+}
+
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color);
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle:hover {
+    color: var(--accent-color);
+}
+
+.theme-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Main content */
+main {
+    margin-top: 80px;
+    min-height: calc(100vh - 180px);
+    padding: 40px 20px;
+}
+
+/* Home page */
+.home-about {
+    text-align: center;
+    padding: 60px 0;
+}
+
+.home-about h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    color: var(--text-color);
+}
+
+.home-about p {
+    font-size: 1.1em;
+    color: var(--text-color);
+    opacity: 0.8;
+}
+
+/* Social icons */
+.social-icons {
+    margin-top: 30px;
+}
+
+.social-icons ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.social-icon svg {
+    width: 28px;
+    height: 28px;
+    transition: all 0.2s ease;
+}
+
+.social-icon svg path {
+    fill: var(--text-color);
+    transition: fill 0.2s ease;
+}
+
+.social-icon a:hover svg path {
+    fill: var(--accent-color);
+}
+
+/* Page content */
+.page-content {
+    max-width: var(--max-width);
+    margin: 0 auto;
+}
+
+.page-content h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+.page-content h2 {
+    font-size: 1.5em;
+    margin: 30px 0 15px;
+}
+
+.page-content h3 {
+    font-size: 1.2em;
+    margin: 25px 0 10px;
+}
+
+.page-content p {
+    margin-bottom: 15px;
+}
+
+.page-content ul, .page-content ol {
+    margin: 15px 0;
+    padding-left: 25px;
+}
+
+.page-content li {
+    margin-bottom: 8px;
+}
+
+.page-content a {
+    color: var(--accent-color);
+    transition: color 0.2s ease;
+}
+
+.page-content a:hover {
+    color: var(--accent-color);
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 30px 20px;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-color);
+    opacity: 0.7;
+    font-size: 0.9em;
+}
+
+.footer a {
+    color: var(--text-color);
+    transition: color 0.2s ease;
+}
+
+.footer a:hover {
+    color: var(--accent-color);
+}
+
+/* Code blocks */
+code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.9em;
+}
+
+pre {
+    background: var(--code-bg);
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin: 20px 0;
+}
+
+pre code {
+    padding: 0;
+    background: none;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    :root {
+        --font-size: 16px;
+    }
+
+    .home-about h1 {
+        font-size: 2em;
+    }
+
+    .nav-links {
+        gap: 15px;
+    }
+
+    main {
+        margin-top: 70px;
+    }
+}
+
+/* CRT Effect - Dark mode overrides */
+[data-theme="dark"] body::before {
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+}
+
+[data-theme="dark"] .social-icon svg path {
+    fill: var(--text-color);
+}
+
+[data-theme="dark"] .social-icon a:hover svg path {
+    fill: var(--accent-color);
+}
+
+/* Tools Page Styles */
+.tools-page {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.tools-page h1 {
+    font-size: 2em;
+    margin-bottom: 10px;
+    color: var(--text-color);
+}
+
+.tools-intro {
+    font-size: 0.95em;
+    color: var(--text-color);
+    opacity: 0.8;
+    margin-bottom: 30px;
+}
+
+.terminal-header {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    margin-bottom: 20px;
+}
+
+.terminal-path {
+    color: var(--accent-color);
+}
+
+.terminal-command {
+    color: var(--text-color);
+}
+
+.terminal-footer {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    margin-top: 30px;
+}
+
+.cursor {
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Tools Grid */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.tool-card {
+    display: block;
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    background: var(--bg-color);
+    transition: border-color 0.2s ease;
+    cursor: pointer;
+}
+
+.tool-card:hover {
+    border-color: var(--accent-color);
+}
+
+.tool-name {
+    font-size: 1.1em;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.tool-desc {
+    font-size: 0.85em;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+/* Tool Page Layout */
+.tool-page {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.tool-title {
+    font-size: 1.8em;
+    margin-bottom: 5px;
+    color: var(--text-color);
+}
+
+.tool-description {
+    font-size: 0.9em;
+    color: var(--text-color);
+    opacity: 0.7;
+    margin-bottom: 25px;
+}
+
+.tool-container {
+    margin-top: 20px;
+}
+
+/* Tool Sections */
+.tool-section {
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    background: var(--bg-color);
+}
+
+.input-section, .output-section {
+    margin-bottom: 20px;
+}
+
+.terminal-label {
+    display: block;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.9em;
+    color: var(--accent-color);
+    margin-bottom: 8px;
+}
+
+.tool-input, .tool-output {
+    width: 100%;
+    min-height: 120px;
+    background: var(--code-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.9em;
+    padding: 12px;
+    resize: vertical;
+    outline: none;
+}
+
+.tool-input:focus {
+    border-color: var(--accent-color);
+}
+
+.tool-output-pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.9em;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 0;
+    min-height: 50px;
+    color: var(--text-color);
+}
+
+/* Tool Actions */
+.tool-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.tool-btn {
+    background: var(--code-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.85em;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.tool-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+/* Status Messages */
+.status-section {
+    margin-top: 15px;
+}
+
+.status-message {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.85em;
+    display: inline-block;
+}
+
+.status-message.error {
+    color: #dc322f;
+}
+
+.status-message.success {
+    color: #859900;
+}
+
+/* Shortcuts Table */
+.shortcuts-container {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+.shortcuts-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.85em;
+}
+
+.shortcuts-table th {
+    background: var(--code-bg);
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    text-align: left;
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.shortcuts-table td {
+    border: 1px solid var(--border-color);
+    padding: 8px 10px;
+    color: var(--text-color);
+}
+
+.shortcut-row:hover td {
+    background: var(--code-bg);
+}
+
+.shortcut-key {
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.shortcut-category {
+    opacity: 0.7;
+    font-size: 0.9em;
+}
+
+.no-results {
+    text-align: center;
+    color: var(--text-color);
+    opacity: 0.7;
+    padding: 20px;
+}
+
+/* Search Input */
+.search-section, .category-filter {
+    margin-bottom: 15px;
+}
+
+.tool-search, .tool-select {
+    width: 100%;
+    max-width: 300px;
+    background: var(--code-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.9em;
+    padding: 8px 12px;
+    outline: none;
+}
+
+.tool-search:focus, .tool-select:focus {
+    border-color: var(--accent-color);
+}
+
+.tool-select {
+    cursor: pointer;
+}
+
+/* Cron Calculator */
+.cron-inputs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.cron-field {
+    flex: 1;
+    min-width: 80px;
+}
+
+.cron-field label {
+    display: block;
+    font-size: 0.75em;
+    color: var(--text-color);
+    opacity: 0.7;
+    margin-bottom: 4px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+.cron-field input {
+    width: 100%;
+    background: var(--code-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 1em;
+    padding: 8px 10px;
+    outline: none;
+}
+
+.cron-field input:focus {
+    border-color: var(--accent-color);
+}
+
+.cron-field input.error {
+    border-color: #dc322f;
+    background: rgba(220, 50, 47, 0.05);
+}
+
+.cron-field input.error:focus {
+    border-color: #dc322f;
+    box-shadow: 0 0 0 2px rgba(220, 50, 47, 0.2);
+}
+
+.cron-string-section {
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+.cron-string-output {
+    background: var(--code-bg);
+    border: 1px solid var(--border-color);
+    color: var(--accent-color);
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 1.2em;
+    padding: 12px 15px;
+    min-height: 20px;
+    word-break: break-all;
+}
+
+.cron-string-input {
+    width: 100%;
+    background: var(--code-bg);
+    border: 1px solid var(--border-color);
+    color: var(--accent-color);
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 1.2em;
+    padding: 12px 15px;
+    outline: none;
+}
+
+.cron-string-input:focus {
+    border-color: var(--accent-color);
+}
+
+.cron-result {
+    margin-top: 15px;
+    padding: 12px 15px;
+    background: var(--code-bg);
+    border-left: 3px solid var(--accent-color);
+    font-style: italic;
+}
+
+.cron-result-section + .tool-actions {
+    margin-top: 20px;
+}
+
+.cron-validation {
+    margin-top: 12px;
+    padding: 10px 12px;
+    font-size: 0.85em;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    border-left: 3px solid;
+}
+
+.cron-validation.valid {
+    border-left-color: #859900;
+    color: #859900;
+    background: rgba(133, 153, 0, 0.05);
+}
+
+.cron-validation.invalid {
+    border-left-color: #dc322f;
+    color: #dc322f;
+    background: rgba(220, 50, 47, 0.05);
+}
+
+.validation-icon {
+    margin-right: 8px;
+    font-weight: bold;
+}
+
+.cron-validation + .tool-actions {
+    margin-top: 20px;
+}
+
+/* Responsive Tools */
+@media (max-width: 600px) {
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tool-actions {
+        flex-direction: column;
+    }
+    
+    .tool-btn {
+        width: 100%;
+    }
+    
+    .shortcuts-table {
+        font-size: 0.8em;
+    }
+    
+    .tool-search, .tool-select {
+        max-width: 100%;
+    }
+}
