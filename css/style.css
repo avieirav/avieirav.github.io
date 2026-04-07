@@ -746,3 +746,162 @@ pre code {
         max-width: 100%;
     }
 }
+
+/* Encoding Options for TOON Converter */
+.encoding-options {
+  margin: 15px 0;
+  border: 1px solid var(--border-color);
+  background: var(--code-bg);
+  padding: 12px;
+}
+
+.encoding-options summary {
+  cursor: pointer;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.9em;
+  color: var(--accent-color);
+  user-select: none;
+}
+
+.encoding-options summary:hover {
+  color: var(--text-color);
+}
+
+.encoding-options[open] summary {
+  margin-bottom: 15px;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.option-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.option-item label {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.85em;
+  color: var(--text-color);
+}
+
+.option-item select {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.9em;
+  padding: 6px 10px;
+  cursor: pointer;
+  outline: none;
+}
+
+.option-item select:hover,
+.option-item select:focus {
+  border-color: var(--accent-color);
+}
+
+.tool-btn.primary {
+  background: var(--accent-color);
+  color: var(--bg-color);
+  border-color: var(--accent-color);
+}
+
+.tool-btn.primary:hover {
+  opacity: 0.9;
+  color: var(--bg-color);
+}
+
+.tool-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tool-input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(7, 54, 66, 0.1);
+}
+
+[data-theme="dark"] .tool-input:focus {
+  box-shadow: 0 0 0 2px rgba(253, 246, 227, 0.1);
+}
+
+/* Token Statistics Panel */
+.token-stats-section {
+  margin: 15px 0;
+  border: 1px solid var(--border-color);
+  background: var(--code-bg);
+  padding: 12px;
+}
+
+.token-stats-header {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.9em;
+  color: var(--accent-color);
+  margin-bottom: 15px;
+}
+
+.token-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.token-stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 10px;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  aspect-ratio: 1 / 1;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.stat-label {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.75em;
+  color: var(--text-color);
+  text-align: center;
+}
+
+.stat-value {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 1.3em;
+  font-weight: 600;
+  color: var(--accent-color);
+  text-align: center;
+}
+
+.stat-savings.positive {
+  color: #859900;
+}
+
+@media (max-width: 600px) {
+  .token-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  
+  .token-stat {
+    padding: 15px 5px;
+    aspect-ratio: auto;
+    min-height: 80px;
+  }
+  
+  .stat-label {
+    font-size: 0.65em;
+  }
+  
+  .stat-value {
+    font-size: 1.1em;
+  }
+}
