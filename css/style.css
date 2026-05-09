@@ -32,59 +32,6 @@ body {
     background: var(--bg-color);
     position: relative;
     overflow-x: hidden;
-    animation: flicker 0.15s infinite;
-}
-
-@keyframes flicker {
-    0% { opacity: 0.97; }
-    50% { opacity: 1; }
-    100% { opacity: 0.98; }
-}
-
-body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: repeating-linear-gradient(
-        0deg,
-        rgba(0, 0, 0, 0.07) 0px,
-        rgba(0, 0, 0, 0.07) 1px,
-        transparent 1px,
-        transparent 3px
-    );
-    pointer-events: none;
-    z-index: 9999;
-}
-
-body::after {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: var(--bg-color);
-    pointer-events: none;
-    z-index: 10000;
-    opacity: 0;
-}
-
-body.theme-changing::after {
-    animation: themeWave 0.6s ease-in-out;
-}
-
-@keyframes themeWave {
-    0% {
-        clip-path: inset(0 0 100% 0);
-        opacity: 1;
-    }
-    100% {
-        clip-path: inset(100% 0 0 0);
-        opacity: 0;
-    }
 }
 
 a {
@@ -101,6 +48,15 @@ a:hover {
     max-width: var(--max-width);
     margin: 0 auto;
     padding: 0 20px;
+}
+
+.container-horizontal {
+    padding: 0 10px;
+    max-width: 100%;
+}
+
+main:has(.container-horizontal) {
+    padding: 40px 5px;
 }
 
 /* Header */
@@ -139,6 +95,20 @@ a:hover {
 
 .nav-links a:hover {
     color: var(--accent-color);
+}
+
+.header-tool-title {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.85em;
+    color: var(--accent-color);
+    margin-left: 20px;
+    white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+    .header-tool-title {
+        display: none;
+    }
 }
 
 .theme-toggle {
@@ -317,16 +287,6 @@ pre code {
 }
 
 /* CRT Effect - Dark mode overrides */
-[data-theme="dark"] body::before {
-    background: repeating-linear-gradient(
-        0deg,
-        rgba(0, 0, 0, 0.15) 0px,
-        rgba(0, 0, 0, 0.15) 1px,
-        transparent 1px,
-        transparent 3px
-    );
-}
-
 [data-theme="dark"] .social-icon svg path {
     fill: var(--text-color);
 }
@@ -439,12 +399,6 @@ pre code {
 }
 
 /* Tool Sections */
-.tool-section {
-    border: 1px solid var(--border-color);
-    padding: 20px;
-    background: var(--bg-color);
-}
-
 .input-section, .output-section {
     margin-bottom: 20px;
 }
@@ -465,6 +419,7 @@ pre code {
     color: var(--text-color);
     font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
     font-size: 0.9em;
+    line-height: 17px;
     padding: 12px;
     resize: vertical;
     outline: none;
@@ -472,6 +427,105 @@ pre code {
 
 .tool-input:focus {
     border-color: var(--accent-color);
+}
+
+/* Tool Page Layout */
+.tool-container {
+    width: 100%;
+}
+
+@media (min-width: 900px) {
+    .tool-container.tool-layout-horizontal {
+        display: flex;
+        gap: 20px;
+        width: 100%;
+        margin: 0;
+    }
+
+    .tool-container.tool-layout-horizontal > .panel-input {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        border: 1px solid var(--border-color);
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .tool-container.tool-layout-horizontal > .panel-output {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        border: 1px solid var(--border-color);
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .tool-container.tool-layout-horizontal .tool-input,
+    .tool-container.tool-layout-horizontal .tool-output {
+        flex: 1;
+        min-height: 300px;
+    }
+}
+
+/* Mobile: vertical layout */
+@media (max-width: 899px) {
+    .tool-container.tool-layout-horizontal {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .tool-container.tool-layout-horizontal .panel-input,
+    .tool-container.tool-layout-horizontal .panel-output {
+        width: 100%;
+    }
+}
+
+/* Editor Wrapper for Line Numbers */
+.editor-wrapper {
+    display: flex;
+    background: var(--code-bg);
+    border: 1px solid var(--border-color);
+    min-height: 120px;
+}
+
+.editor-wrapper:focus-within {
+    border-color: var(--accent-color);
+}
+
+.line-numbers {
+    padding: 0 8px 0 12px;
+    background: var(--code-bg);
+    border-right: 1px solid var(--border-color);
+    text-align: right;
+    user-select: none;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.9em;
+    min-width: 40px;
+    overflow: hidden;
+}
+
+.line-number {
+    height: 17px;
+    line-height: 17px;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+.line-number:first-child {
+    padding-top: 12px;
+    height: auto;
+    line-height: normal;
+}
+
+.line-number.error {
+    color: #dc322f;
+    font-weight: bold;
+    opacity: 1;
 }
 
 .tool-output-pre {
