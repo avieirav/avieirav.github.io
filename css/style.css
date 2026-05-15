@@ -1393,6 +1393,309 @@ pre code {
   color: #859900;
 }
 
+/* Diff Tool - Base styles */
+.diff-output {
+  background: var(--code-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-color);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  line-height: 1.6;
+  padding: 14px;
+  min-height: 280px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  flex: 1;
+}
+
+.diff-container {
+  width: 100%;
+}
+
+.diff-added {
+  background: rgba(133, 153, 0, 0.2);
+  color: #859900;
+  text-decoration: none;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+.diff-removed {
+  background: rgba(220, 50, 47, 0.2);
+  color: #dc322f;
+  text-decoration: line-through;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+.diff-unchanged {
+  color: var(--text-color);
+}
+
+.diff-inputs-wrapper {
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  min-height: 0;
+}
+
+.diff-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.diff-panel .input-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.diff-panel .tool-input {
+  flex: 1;
+  min-height: 80px;
+  resize: none;
+}
+
+.panel-output {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+}
+
+.panel-output .output-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.file-loader {
+  margin-top: 8px;
+}
+
+.file-loader input[type="file"] {
+  display: none;
+}
+
+.file-loader label {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75em;
+  color: var(--accent-color);
+  cursor: pointer;
+  padding: 2px 6px;
+  border: 1px dashed var(--border-color);
+  border-radius: 4px;
+  opacity: 0.7;
+}
+
+.file-loader label:hover {
+  opacity: 1;
+  border-color: var(--accent-color);
+}
+
+.diff-controls {
+  display: none;
+}
+
+.diff-visibility-toggles {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: 8px;
+}
+
+.visibility-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75em;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 4px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--card-bg);
+  transition: all var(--transition-fast);
+}
+
+.visibility-toggle:hover {
+  border-color: var(--accent-color);
+}
+
+.visibility-toggle input[type="checkbox"] {
+  display: none;
+}
+
+.visibility-icon {
+  display: flex;
+  align-items: center;
+  color: var(--accent-color);
+}
+
+.visibility-icon .eye-closed {
+  display: none;
+  color: #dc322f;
+}
+
+.visibility-toggle input:checked ~ .visibility-icon .eye-open {
+  display: block;
+}
+
+.visibility-toggle input:checked ~ .visibility-icon .eye-closed {
+  display: none;
+}
+
+.visibility-toggle input:not(:checked) ~ .visibility-icon .eye-open {
+  display: none;
+}
+
+.visibility-toggle input:not(:checked) ~ .visibility-icon .eye-closed {
+  display: block;
+}
+
+.visibility-label {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.visibility-toggle input:not(:checked) ~ .visibility-label {
+  color: #dc322f;
+}
+
+.diff-hidden .diff-panel:first-child,
+.diff-hidden-modified .diff-panel:last-child,
+.diff-hidden-diff .panel-output {
+  display: none !important;
+}
+
+.diff-hidden.diff-hidden-modified .diff-panels-row {
+  display: none;
+}
+
+.diff-hidden.diff-hidden-modified .panel-output {
+  width: 100%;
+  flex: 1;
+}
+
+/* Diff Tool - Layout Modes */
+.diff-layout-horizontal .diff-inputs-wrapper {
+  flex-direction: row;
+}
+
+.diff-layout-horizontal .diff-panels-row {
+  display: flex;
+  flex: 1;
+  gap: 12px;
+}
+
+.diff-layout-horizontal .diff-panels-row .diff-panel {
+  flex: 1;
+}
+
+.diff-layout-horizontal .panel-output {
+  flex: 1;
+}
+
+.diff-layout-vertical .diff-inputs-wrapper {
+  flex-direction: column;
+  gap: 12px;
+}
+
+.diff-layout-vertical .diff-panels-row {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 12px;
+}
+
+.diff-layout-vertical .diff-panels-row .diff-panel {
+  flex: 1;
+  min-height: 150px;
+}
+
+.diff-layout-vertical .panel-output {
+  width: 100%;
+  min-height: 200px;
+}
+
+.diff-layout-top-stacked .diff-inputs-wrapper {
+  flex-direction: column;
+}
+
+.diff-layout-top-stacked .diff-panels-row {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.diff-layout-top-stacked .diff-panels-row .diff-panel {
+  flex: 1;
+}
+
+.diff-layout-top-stacked .panel-output {
+  width: 100%;
+}
+
+.diff-layout-left-stacked .diff-inputs-wrapper {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.diff-layout-left-stacked .diff-panels-row {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 12px;
+  width: 50%;
+}
+
+.diff-layout-left-stacked .diff-panels-row .diff-panel {
+  flex: 1;
+}
+
+.diff-layout-left-stacked .panel-output {
+  width: 50%;
+}
+
+.diff-layout-right-stacked .diff-inputs-wrapper {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.diff-layout-right-stacked .diff-panels-row {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 12px;
+  width: 50%;
+}
+
+.diff-layout-right-stacked .diff-panels-row .diff-panel {
+  flex: 1;
+}
+
+.diff-layout-right-stacked .panel-output {
+  width: 50%;
+}
+
 @media (max-width: 600px) {
   .token-stats-grid {
     grid-template-columns: repeat(3, 1fr);
