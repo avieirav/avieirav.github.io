@@ -4,11 +4,27 @@
 <button class=theme-option data-theme=light>Light</button>
 <button class=theme-option data-theme=solarized-light>Solarized</button></div><div class=theme-section><span class=theme-section-label>Dark</span>
 <button class=theme-option data-theme=dark>Dark</button>
-<button class=theme-option data-theme=solarized-dark>Solarized</button></div></div></div></nav></header><main><div class=container><div class=tool-container><div class=tool-section><div class=input-section><label class=terminal-label>> Mermaid Flowchart:</label>
+<button class=theme-option data-theme=solarized-dark>Solarized</button></div></div></div></nav></header><main><div class="container container-horizontal"><div class="tool-container tool-layout-horizontal"><div class=mermaid-row><div class=panel-input><label class=terminal-label>> Mermaid Flowchart:</label>
 <textarea id=mermaid-input class=tool-input placeholder="graph TD
     A[Start] --> B{Decision}
     B -->|Yes| C[Action 1]
-    B -->|No| D[Action 2]" rows=12></textarea></div><div class=tool-actions><button id=convert-btn class=tool-btn>[Convert]</button>
+    B -->|No| D[Action 2]" rows=10></textarea></div><div class=panel-preview><label class=terminal-label>> Mermaid Preview:</label><div class=preview-container><button class=fullscreen-btn title=Fullscreen>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+</button>
+<button class=exit-fullscreen-btn title="Exit Fullscreen">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button><div id=mermaid-preview class=mermaid-preview></div></div></div></div><div class=canvas-row><div class=panel-input><label class=terminal-label>> JSON Canvas Output:</label>
+<textarea id=canvas-output class=tool-output rows=10 readonly></textarea></div><div class=panel-preview><label class=terminal-label>> JSON Canvas Preview:</label><div class=preview-container><button class=fullscreen-btn title=Fullscreen>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+</button>
+<button class=exit-fullscreen-btn title="Exit Fullscreen">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button><div id=json-canvas-preview class=json-canvas-preview></div></div></div></div><p><span id=status-message class=status-message></span></p></div></div><div class=floating-bar><button id=convert-btn class="tool-btn primary">[Convert]</button>
 <button id=copy-btn class=tool-btn>[Copy JSON]</button>
-<button id=clear-btn class=tool-btn>[Clear]</button></div><div class=output-section><label class=terminal-label>> JSON Canvas Output:</label>
-<textarea id=canvas-output class=tool-output rows=20 readonly></textarea></div><div class=status-section><span id=status-message class=status-message></span></div><div class=preview-section><label class=terminal-label>> Preview (optional):</label><div id=mermaid-preview class=mermaid-preview></div></div></div></div></div></main><script src=/js/theme.js></script><script src=https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs></script><script src=https://cdn.jsdelivr.net/npm/@dagrejs/dagre@1.1.8/dist/dagre.min.js></script><script src=/js/tools/mermaid-converter.js></script></body></html>
+<button id=download-btn class=tool-btn>[Download JSON]</button>
+<button id=clear-btn class=tool-btn>[Clear]</button><div class=diff-visibility-toggles><label class=visibility-toggle title="Toggle Mermaid"><input type=checkbox id=toggle-mermaid checked>
+<span class=visibility-icon><svg class="eye-open" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+<svg class="eye-closed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07.0 0112 20c-7 0-11-8-11-8a18.45 18.45.0 015.06-5.94M9.9 4.24A9.12 9.12.0 0112 4c7 0 11 8 11 8a18.5 18.5.0 01-2.16 3.19m-6.72-1.07A3 3 0 119.88 9.88"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+</span><span class=visibility-label>Mermaid</span>
+</label><label class=visibility-toggle title="Toggle Canvas"><input type=checkbox id=toggle-canvas checked>
+<span class=visibility-icon><svg class="eye-open" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+<svg class="eye-closed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07.0 0112 20c-7 0-11-8-11-8a18.45 18.45.0 015.06-5.94M9.9 4.24A9.12 9.12.0 0112 4c7 0 11 8 11 8a18.5 18.5.0 01-2.16 3.19m-6.72-1.07A3 3 0 119.88 9.88"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+</span><span class=visibility-label>Canvas</span></label></div></div></main><script src=/js/theme.js></script><script src=https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js></script><script src=https://cdn.jsdelivr.net/npm/@dagrejs/dagre@1.1.8/dist/dagre.min.js></script><script src=/js/tools/mermaid-converter.js></script></body></html>
