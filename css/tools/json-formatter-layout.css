@@ -1,0 +1,66 @@
+@media (min-width: 900px) {
+    .tool-container.tool-layout-horizontal {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        min-height: 500px;
+    }
+
+    .tool-container.tool-layout-horizontal .panel-input,
+    .tool-container.tool-layout-horizontal .panel-output {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 16px;
+    }
+
+    .tool-container.tool-layout-horizontal .panel-input {
+        flex: 0 0 40%;
+    }
+
+    .tool-container.tool-layout-horizontal .panel-output {
+        flex: 0 0 60%;
+    }
+
+    .tool-container.tool-layout-horizontal .json-editor-wrapper {
+        flex: 1;
+        min-height: 140px;
+        display: flex;
+        flex-direction: column;
+        background: var(--code-bg);
+        border-radius: 8px;
+        padding: 0;
+        resize: vertical;
+        color: var(--text-color);
+        outline: none;
+        transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .tool-container.tool-layout-horizontal .json-editor-wrapper:focus-within {
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .tool-container.tool-layout-horizontal .json-editor {
+        flex: 1;
+        min-height: 0;
+        height: 100%;
+        background: transparent;
+        border: none;
+        outline: none;
+        font-family: var(--font-mono);
+        font-size: 0.9em;
+        line-height: 1.6;
+        color: var(--text-color);
+        padding: 14px;
+        box-sizing: border-box;
+    }
+
+    .tool-container.tool-layout-horizontal .tool-output {
+        flex: 1;
+        min-height: 0;
+    }
+}

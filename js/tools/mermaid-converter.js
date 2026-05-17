@@ -328,6 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setStatus('Error: ' + error.message, true);
             output.value = '';
             preview.innerHTML = '<em class="error">Preview not available - check syntax</em>';
+            preview.closest('.preview-container').classList.remove('has-content');
         }
     }
 
@@ -369,6 +370,7 @@ document.addEventListener('DOMContentLoaded', function() {
         jsonCanvasPreview.innerHTML = '';
         clearStatus();
         input.focus();
+        document.querySelectorAll('.preview-container').forEach(c => c.classList.remove('has-content'));
     }
 
     async function renderPreview(mermaidCode) {
@@ -376,8 +378,10 @@ document.addEventListener('DOMContentLoaded', function() {
             preview.innerHTML = '';
             const { svg } = await mermaid.render('mermaid-preview-' + Date.now(), mermaidCode);
             preview.innerHTML = svg;
+            preview.closest('.preview-container').classList.add('has-content');
         } catch (e) {
             preview.innerHTML = '<em>Preview not available</em>';
+            preview.closest('.preview-container').classList.remove('has-content');
         }
     }
 
@@ -388,6 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (nodes.length === 0) {
                 jsonCanvasPreview.innerHTML = '<em>No nodes to display</em>';
+                jsonCanvasPreview.closest('.preview-container').classList.remove('has-content');
                 return;
             }
 
@@ -457,8 +462,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             svg += '</svg>';
             jsonCanvasPreview.innerHTML = svg;
+            jsonCanvasPreview.closest('.preview-container').classList.add('has-content');
         } catch (e) {
             jsonCanvasPreview.innerHTML = '<em>Preview render error</em>';
+            jsonCanvasPreview.closest('.preview-container').classList.remove('has-content');
         }
     }
 
@@ -466,6 +473,8 @@ document.addEventListener('DOMContentLoaded', function() {
     copyBtn.addEventListener('click', copyToClipboard);
     downloadBtn.addEventListener('click', downloadJson);
     clearBtn.addEventListener('click', clearAll);
+
+    document.querySelectorAll('.preview-container').forEach(c => c.classList.remove('has-content'));
 
     const toggleMermaid = document.getElementById('toggle-mermaid');
     const toggleCanvas = document.getElementById('toggle-canvas');
@@ -508,7 +517,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (fullscreenBtn) {
             fullscreenBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                container.classList.add('fullscreen');
+                if (container.offsetParent !== null && container.offsetWidth > 0 && container.offsetHeight > 0) {
+                    container.classList.add('fullscreen');
+                }
             });
         }
 

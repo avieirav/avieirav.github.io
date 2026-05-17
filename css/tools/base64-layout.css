@@ -1,0 +1,34 @@
+@media (min-width: 900px) {
+    .tool-container.tool-layout-horizontal {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        min-height: 500px;
+    }
+
+    .tool-container.tool-layout-horizontal .panel-input,
+    .tool-container.tool-layout-horizontal .panel-output {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 16px;
+    }
+
+    .tool-container.tool-layout-horizontal .panel-input {
+        flex: 0 0 40%;
+    }
+
+    .tool-container.tool-layout-horizontal .panel-output {
+        flex: 0 0 60%;
+    }
+
+    .tool-container.tool-layout-horizontal .tool-input,
+    .tool-container.tool-layout-horizontal .tool-output {
+        flex: 1;
+        min-height: 0;
+    }
+}

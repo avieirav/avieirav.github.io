@@ -969,6 +969,7 @@ pre code {
     align-items: center;
     justify-content: center;
     color: var(--text-color);
+    pointer-events: none;
 }
 
 .exit-fullscreen-btn {
@@ -987,8 +988,9 @@ pre code {
     color: var(--text-color);
 }
 
-.preview-container:hover .fullscreen-btn {
+.preview-container.has-content:hover .fullscreen-btn {
     opacity: 1;
+    pointer-events: all;
 }
 
 .preview-container.fullscreen {
@@ -1059,7 +1061,7 @@ pre code {
     color: white;
 }
 
-.preview-container:hover .fullscreen-btn {
+.preview-container.has-content:hover .fullscreen-btn {
     opacity: 1;
 }
 
