@@ -225,7 +225,7 @@ function extractGraphData(mermaidCode) {
                 return;
             }
 
-            const parts = trimmedLine.split(/\s*(-->|==>|-\.-|-\.\.->|~>|-+>)\s*/);
+            const parts = trimmedLine.split(/\s*(-->|==>|~>|-+>|--?\.+>?)\s*/);
             
             if (parts.length >= 3) {
                 const fromPart = parts[0].trim();
