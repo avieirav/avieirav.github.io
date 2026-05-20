@@ -187,7 +187,9 @@ function extractGraphData(mermaidCode) {
             '[': '', ']': '',
             '{': '', '}': '',
             '(': '', ')': '',
-            '>': '', '<': ''
+            '>': '', '<': '',
+            '/': '',
+            '"': ''
         };
 
         function extractNodeIdAndLabel(line) {
@@ -203,6 +205,7 @@ function extractGraphData(mermaidCode) {
                 for (const [chars, replacement] of Object.entries(nodeShapeReplacements)) {
                     rest = rest.replace(new RegExp('\\' + chars, 'g'), '');
                 }
+                rest = rest.replace(/:::\w+$/, '').trim();
                 const labelMatch = rest.match(/^(?:\s*(\S.*?))?\s*$/);
                 if (labelMatch && labelMatch[1]) {
                     label = labelMatch[1].trim();
@@ -214,7 +217,8 @@ function extractGraphData(mermaidCode) {
 
         lines.forEach(line => {
             const trimmedLine = line.trim();
-            if (trimmedLine.startsWith('graph') || 
+            if (trimmedLine === 'end' || 
+                trimmedLine.startsWith('graph') || 
                 trimmedLine.startsWith('flowchart') || 
                 trimmedLine.startsWith('subgraph') ||
                 trimmedLine.startsWith('%%') ||
