@@ -115,9 +115,10 @@ document.addEventListener('DOMContentLoaded', function() {
         return text.replace(/^(fa:fa-[a-z0-9-]+\s*|fa-[a-z0-9-]+\s*|icon:[a-z0-9-]+\s*)+/i, '').trim();
     }
 
-    function extractGraphData(mermaidCode) {
+function extractGraphData(mermaidCode) {
         const nodes = new Map();
         const edges = [];
+        const nodeStyles = new Map();
         
         const lines = mermaidCode.split('\n');
         
@@ -130,91 +131,149 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        const nodePattern = /([a-zA-Z0-9_]+)\s*(?:\[([^\]]*)\]|\{([^\}]*)\}|\(([^\)]*)\)|>\s*([^>]*)\>)?/g;
-        
         lines.forEach(line => {
             const trimmedLine = line.trim();
-            if (trimmedLine.startsWith('graph') || 
-                trimmedLine.startsWith('flowchart') || 
-                trimmedLine.startsWith('subgraph') || 
-                trimmedLine.startsWith('style') ||
-                trimmedLine.startsWith('classDef') ||
-                trimmedLine.startsWith('click') ||
-                trimmedLine === '' ||
-                trimmedLine.startsWith('%%')) {
-                
-                if (trimmedLine.startsWith('style')) {
-                    const styleMatch = trimmedLine.match(/style\s+([a-zA-Z0-9_]+)\s+fill:([^,\s]+)/i);
-                    if (styleMatch) {
-                        const nodeId = styleMatch[1];
-                        const color = styleMatch[2].toLowerCase();
+            
+            if (trimmedLine.startsWith('classDef')) {
+                const classMatch = trimmedLine.match(/classDef\s+(\w+)\s+([^:]+)(?::(.+))?/i);
+                if (classMatch) {
+                    const className = classMatch[1];
+                    const styles = classMatch[3] || classMatch[2];
+                    const styleMap = {};
+                    styles.split(',').forEach(s => {
+                        const [key, val] = s.split(':').map(x => x.trim());
+                        if (key && val) styleMap[key] = val;
+                    });
+                    if (styleMap.fill) {
+                        const colorMap = { '#e1f5fe': '5', '#f3f4f6': '2', '#fdf4ff': '6', '#fee2e2': '1', '#fffbeb': '3' };
+                        nodeStyles.set(className, { color: colorMap[styleMap.fill] || null });
+                    }
+                }
+                return;
+            }
+            
+            if (trimmedLine.startsWith('style')) {
+                const styleMatch = trimmedLine.match(/style\s+([a-zA-Z0-9_]+)\s+([^,]+)/i);
+                if (styleMatch) {
+                    const nodeId = styleMatch[1];
+                    const styleStr = styleMatch[2];
+                    const styleMap = {};
+                    styleStr.split(',').forEach(s => {
+                        const [key, val] = s.split(':').map(x => x.trim());
+                        if (key && val) styleMap[key] = val;
+                    });
+                    if (styleMap.fill) {
+                        const colorMap = { '#e1f5fe': '5', '#f3f4f6': '2', '#fdf4ff': '6', '#fee2e2': '1', '#fffbeb': '3' };
                         if (nodes.has(nodeId)) {
-                            const existingNode = nodes.get(nodeId);
-                            existingNode.color = COLOR_MAP[color] || COLOR_MAP[color.replace('#', '')] || null;
+                            nodes.get(nodeId).color = colorMap[styleMap.fill] || null;
                         }
                     }
                 }
                 return;
             }
-
-            let match;
-            const localNodePattern = /([a-zA-Z0-9_]+)\s*(?:\[([^\]]*)\]|\{([^\}]*)\}|\(([^\)]*)\)|>([^>]*)>)/g;
-            while ((match = localNodePattern.exec(trimmedLine)) !== null) {
-                const nodeId = match[1];
-                const labelText = match[2] || match[3] || match[4] || match[5] || nodeId;
-                if (!nodes.has(nodeId)) {
-                    nodes.set(nodeId, {
-                        id: nodeId,
-                        label: cleanIconLabel(labelText),
-                        color: null
-                    });
-                }
-            }
         });
 
-        const edgePattern = /([a-zA-Z0-9_]+)\s*(?:\[([^\]]*)\]|\{([^\}]*)\}|\(([^\)]*)\)|>([^>]*)>)?\s*(-->|==>|-\.-|-[.]->|==>|~>|-+)>?\s*(?:\|([^\|]*)\|)?\s*([a-zA-Z0-9_]+)\s*(?:\[([^\]]*)\]|\{([^\}]*)\}|\(([^\)]*)\)|>([^>]*)>)?/g;
-        
+        const nodePatterns = [
+            /\[([^\]]*)\]/,
+            /\{([^}]*)\}/,
+            /\(([^)]*)\)/,
+            /\[([^\]]*)\]/,
+            /\(\(([^)]*)\)\)/,
+            /\{([^{}]*)\}/,
+            />([^<]*)</
+        ];
+
+        const nodeShapeReplacements = {
+            '[': '', ']': '',
+            '{': '', '}': '',
+            '(': '', ')': '',
+            '>': '', '<': ''
+        };
+
+        function extractNodeIdAndLabel(line) {
+            const idMatch = line.match(/^([a-zA-Z0-9_]+)\s*(.*)$/);
+            if (!idMatch) return null;
+            
+            const nodeId = idMatch[1];
+            let rest = idMatch[2];
+            
+            let label = nodeId;
+            
+            if (rest) {
+                for (const [chars, replacement] of Object.entries(nodeShapeReplacements)) {
+                    rest = rest.replace(new RegExp('\\' + chars, 'g'), '');
+                }
+                const labelMatch = rest.match(/^(?:\s*(\S.*?))?\s*$/);
+                if (labelMatch && labelMatch[1]) {
+                    label = labelMatch[1].trim();
+                }
+            }
+            
+            return { id: nodeId, label: label || nodeId };
+        }
+
         lines.forEach(line => {
             const trimmedLine = line.trim();
             if (trimmedLine.startsWith('graph') || 
                 trimmedLine.startsWith('flowchart') || 
-                trimmedLine.startsWith('subgraph') || 
-                trimmedLine.startsWith('style') ||
+                trimmedLine.startsWith('subgraph') ||
+                trimmedLine.startsWith('%%') ||
                 trimmedLine.startsWith('classDef') ||
+                trimmedLine.startsWith('style') ||
                 trimmedLine.startsWith('click') ||
-                trimmedLine === '' ||
-                trimmedLine.startsWith('%%')) {
+                trimmedLine === '') {
                 return;
             }
 
-            const simpleEdgePattern = /([a-zA-Z0-9_]+)(?:\[([^\]]*)\]|\{([^\}]*)\}|\(([^\)]*)\))?\s*(-->|==>|-\.-|-\.\.->|~>)(?:\|([^|]+)\|)?\s*([a-zA-Z0-9_]+)(?:\[([^\]]*)\]|\{([^\}]*)\}|\(([^\)]*)\))?/g;
-            let edgeMatch;
+            const parts = trimmedLine.split(/\s*(-->|==>|-\.-|-\.\.->|~>|-+>)\s*/);
             
-            while ((edgeMatch = simpleEdgePattern.exec(trimmedLine)) !== null) {
-                const fromNode = edgeMatch[1];
-                const toNode = edgeMatch[7];
-                const edgeLabel = edgeMatch[6] || null;
+            if (parts.length >= 3) {
+                const fromPart = parts[0].trim();
+                const toPart = parts[parts.length - 1].trim();
                 
-                if (!nodes.has(fromNode)) {
-                    nodes.set(fromNode, {
-                        id: fromNode,
-                        label: fromNode,
+                const fromNode = extractNodeIdAndLabel(fromPart);
+                const toNode = extractNodeIdAndLabel(toPart);
+                
+                let edgeLabel = null;
+                if (parts.length > 2) {
+                    const middle = trimmedLine.substring(fromPart.length, trimmedLine.length - toPart.length);
+                    const labelMatch = middle.match(/\|([^|]+)\|/);
+                    if (labelMatch) {
+                        edgeLabel = labelMatch[1].trim();
+                    }
+                }
+                
+                if (fromNode && toNode) {
+                    if (!nodes.has(fromNode.id)) {
+                        nodes.set(fromNode.id, {
+                            id: fromNode.id,
+                            label: cleanIconLabel(fromNode.label),
+                            color: null
+                        });
+                    }
+                    if (!nodes.has(toNode.id)) {
+                        nodes.set(toNode.id, {
+                            id: toNode.id,
+                            label: cleanIconLabel(toNode.label),
+                            color: null
+                        });
+                    }
+                    
+                    edges.push({
+                        from: fromNode.id,
+                        to: toNode.id,
+                        label: edgeLabel
+                    });
+                }
+            } else {
+                const nodeInfo = extractNodeIdAndLabel(trimmedLine);
+                if (nodeInfo && !nodes.has(nodeInfo.id)) {
+                    nodes.set(nodeInfo.id, {
+                        id: nodeInfo.id,
+                        label: cleanIconLabel(nodeInfo.label),
                         color: null
                     });
                 }
-                if (!nodes.has(toNode)) {
-                    nodes.set(toNode, {
-                        id: toNode,
-                        label: toNode,
-                        color: null
-                    });
-                }
-                
-                edges.push({
-                    from: fromNode,
-                    to: toNode,
-                    label: edgeLabel
-                });
             }
         });
 
