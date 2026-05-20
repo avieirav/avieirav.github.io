@@ -772,7 +772,7 @@ pre code {
         gap: 16px;
         width: 100%;
         flex: 1;
-        min-height: 200px;
+        min-height: 600px;
     }
 
     .tool-container.tool-layout-horizontal .mermaid-row .panel-input,
@@ -797,6 +797,7 @@ pre code {
     .tool-container.tool-layout-horizontal .mermaid-row .panel-preview,
     .tool-container.tool-layout-horizontal .canvas-row .panel-preview {
         flex: 0 0 60%;
+        min-height: 600px;
     }
 
     .tool-container.tool-layout-horizontal .mermaid-row .tool-input,
@@ -810,7 +811,7 @@ pre code {
     .tool-container.tool-layout-horizontal .mermaid-row .mermaid-preview,
     .tool-container.tool-layout-horizontal .canvas-row .json-canvas-preview {
         flex: 1;
-        min-height: 0;
+        min-height: 580px;
         border-radius: 6px;
     }
 }
@@ -866,7 +867,7 @@ pre code {
     display: flex;
     align-items: stretch;
     border: 1px solid var(--border-color);
-    min-height: 400px;
+    min-height: 600px;
     height: auto;
     border-radius: 4px;
     overflow: hidden;
@@ -888,7 +889,7 @@ pre code {
     line-height: 1.5;
     white-space: pre;
     overflow: auto;
-    min-height: 400px;
+    min-height: 600px;
     height: 100%;
     box-sizing: border-box;
     background: var(--code-bg);
@@ -1001,23 +1002,22 @@ pre code {
     height: 100vh;
     z-index: 10000;
     background: var(--card-bg, #ffffff);
-    padding: 60px 40px 40px 40px;
+    padding: 0;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
 }
 
 .preview-container.fullscreen .fullscreen-btn {
-    display: none;
+    display: none !important;
 }
 
 .preview-container.fullscreen .exit-fullscreen-btn {
-    display: flex !important;
-    position: absolute;
+    position: fixed;
     top: 15px;
     right: 15px;
     cursor: pointer;
-    z-index: 10001;
+    z-index: 10002;
     padding: 8px 12px;
     background: var(--accent-color, #4f46e5);
     color: white;
@@ -1026,21 +1026,44 @@ pre code {
     font-size: 12px;
     font-weight: 500;
     pointer-events: all;
-}
-
-.preview-container.fullscreen .mermaid-preview,
-.preview-container.fullscreen .json-canvas-preview {
-    flex: 1;
-    width: 100%;
-    height: 100%;
-    display: flex;
+    display: flex !important;
     align-items: center;
-    justify-content: center;
+    gap: 6px;
 }
 
-[data-theme="dark"] .preview-container.fullscreen,
-[data-theme="solarized-dark"] .preview-container.fullscreen {
-    background: var(--card-bg, #1f2937);
+body.fullscreen-active {
+    overflow: hidden !important;
+    height: 100vh !important;
+}
+
+body.fullscreen-active .header,
+body.fullscreen-active .footer {
+    display: none !important;
+}
+
+.preview-container.fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 10000 !important;
+    background: var(--code-bg, #f3f4f6) !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+.preview-container.fullscreen .json-canvas-preview {
+    width: 100vw !important;
+    height: 100vh !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+.preview-container.fullscreen .json-canvas-preview .canvas-container {
+    width: 100vw !important;
+    height: 100vh !important;
 }
 
 [data-theme="dark"] .fullscreen-btn,
@@ -1068,24 +1091,69 @@ pre code {
 /* JSON Canvas Preview */
 .json-canvas-preview {
     flex: 1;
-    min-height: 200px;
+    min-height: 580px;
     background: var(--code-bg);
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    padding: 16px;
-    overflow: auto;
+    padding: 0;
+    overflow: hidden;
     display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
+    align-items: center;
+    justify-content: center;
+    position: relative;
     box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+}
+
+.json-canvas-preview .canvas-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.preview-container.fullscreen .json-canvas-preview .canvas-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
 }
 
 .json-canvas-preview svg {
     display: block;
-    max-width: 100%;
-    height: auto;
-    max-height: 100%;
-    box-sizing: border-box;
+    margin: auto;
+}
+
+.json-canvas-preview .canvas-nodes {
+    transform-origin: 0 0;
+}
+
+.canvas-controls {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 50;
+}
+
+.json-canvas-preview .canvas-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.json-canvas-preview svg {
+    display: block;
+}
+
+.json-canvas-preview .canvas-nodes {
+    transform-origin: 0 0;
 }
 
 .json-canvas-preview .node {
@@ -1120,6 +1188,108 @@ pre code {
     fill: var(--card-bg);
     stroke: var(--border-color);
     stroke-width: 1;
+}
+
+/* Draggable Canvas */
+.canvas-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.canvas-nodes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10000px;
+    height: 10000px;
+    transform-origin: 0 0;
+}
+
+.canvas-node {
+    position: absolute;
+    background: var(--card-bg);
+    border: 2px solid var(--accent-color);
+    border-radius: 8px;
+    padding: 12px;
+    cursor: grab;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-color);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: box-shadow 0.2s ease;
+}
+
+.canvas-node:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.canvas-node.is-dragging {
+    cursor: grabbing;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    z-index: 100;
+}
+
+.canvas-node .node-text-content {
+    text-align: center;
+    word-break: break-word;
+    overflow: hidden;
+}
+
+.preview-container.fullscreen .canvas-controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+.canvas-controls {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 50;
+}
+
+.canvas-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.canvas-btn:hover {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+body.will-pan {
+    cursor: grab;
+}
+
+body.will-pan .canvas-node {
+    cursor: grab;
+}
+
+body.will-pan.canvas-panning {
+    cursor: grabbing;
 }
 
 /* Floating actions - always visible at bottom */

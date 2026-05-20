@@ -25,6 +25,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearBtn = document.getElementById('clear-btn');
     const statusMessage = document.getElementById('status-message');
 
+    let scale = 1, panOffsetX = 0, panOffsetY = 0;
+    let isDragging = false, isPanning = false, isSpacePressed = false;
+    let selectedElement = null, startX = 0, startY = 0;
+    let canvasJsonData = { nodes: [], edges: [] };
+    let currentDirection = 'TD';
+    const ZOOM_SPEED = 0.1;
+    const minScale = 0.35;
+    const maxScale = 1.25;
     const NODE_WIDTH = 200;
     const NODE_HEIGHT = 100;
     const SPACING_X = 250;
@@ -315,6 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const graphData = extractGraphData(mermaidCode);
             
             const direction = graphData.direction || 'TD';
+            currentDirection = direction;
             const positionedNodes = calculateLayout(graphData, direction);
             
             const canvasJson = generateCanvasJson(positionedNodes, graphData.edges);
@@ -385,10 +394,160 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function renderJsonCanvasPreview(canvasJson) {
+    function getAnchorPoint(node, side) {
+        const x = parseInt(node.style.left, 10) || 0;
+        const y = parseInt(node.style.top, 10) || 0;
+        const width = node.offsetWidth;
+        const height = node.offsetHeight;
+
+        switch (side) {
+            case 'top': return { x: x + width / 2, y: y };
+            case 'right': return { x: x + width, y: y + height / 2 };
+            case 'bottom': return { x: x + width / 2, y: y + height };
+            case 'left': return { x: x, y: y + height / 2 };
+            default: return { x: x + width / 2, y: y + height / 2 };
+        }
+    }
+
+function generatePathD(fromPoint, toPoint) {
+        return `M ${fromPoint.x} ${fromPoint.y} L ${toPoint.x} ${toPoint.y}`;
+    }
+
+function drawEdges(container) {
+        const svgContainer = container.querySelector('.canvas-edges');
+        if (!svgContainer) return;
+        svgContainer.innerHTML = '';
+
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        defs.innerHTML = `
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-color, #6b7280)" />
+            </marker>
+        `;
+        svgContainer.appendChild(defs);
+
+        canvasJsonData.edges.forEach(edge => {
+            const fromNode = container.querySelector(`[data-node-id="${edge.fromNode}"]`);
+            const toNode = container.querySelector(`[data-node-id="${edge.toNode}"]`);
+
+            if (fromNode && toNode) {
+                let fromSide, toSide;
+                if (currentDirection === 'LR') {
+                    fromSide = 'right';
+                    toSide = 'left';
+                } else {
+                    fromSide = 'bottom';
+                    toSide = 'top';
+                }
+                const fromPoint = getAnchorPoint(fromNode, fromSide);
+                const toPoint = getAnchorPoint(toNode, toSide);
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', generatePathD(fromPoint, toPoint));
+                path.setAttribute('stroke', 'var(--text-color, #6b7280)');
+                path.setAttribute('stroke-width', '2');
+                path.setAttribute('fill', 'none');
+                path.setAttribute('marker-end', 'url(#arrow)');
+                svgContainer.appendChild(path);
+
+                if (edge.label) {
+                    const midX = (fromPoint.x + toPoint.x) / 2;
+                    const midY = (fromPoint.y + toPoint.y) / 2;
+                    const labelWidth = edge.label.length * 8 + 16;
+                    const labelHeight = 20;
+
+                    const labelBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    labelBg.setAttribute('x', midX - labelWidth / 2);
+                    labelBg.setAttribute('y', midY - labelHeight / 2);
+                    labelBg.setAttribute('width', labelWidth);
+                    labelBg.setAttribute('height', labelHeight);
+                    labelBg.setAttribute('rx', '4');
+                    labelBg.setAttribute('fill', 'var(--code-bg, #f3f4f6)');
+                    labelBg.setAttribute('stroke', 'var(--border-color, #d1d5db)');
+                    svgContainer.appendChild(labelBg);
+
+                    const labelText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    labelText.setAttribute('x', midX);
+                    labelText.setAttribute('y', midY + 1);
+                    labelText.setAttribute('text-anchor', 'middle');
+                    labelText.setAttribute('dominant-baseline', 'middle');
+                    labelText.setAttribute('fill', 'var(--text-color, #374151)');
+                    labelText.setAttribute('font-size', '12');
+                    labelText.textContent = edge.label;
+                    svgContainer.appendChild(labelText);
+                }
+            }
+        });
+    }
+
+    function updateCanvasJson() {
+        const previewContainer = jsonCanvasPreview.closest('.preview-container');
+        const nodes = previewContainer.querySelectorAll('.canvas-node');
+
+        canvasJsonData.nodes = Array.from(nodes).map(node => {
+            const nodeId = node.getAttribute('data-node-id');
+            const originalNode = canvasJsonData.nodes.find(n => n.id === nodeId);
+            return {
+                id: nodeId,
+                type: 'text',
+                text: node.querySelector('.node-text-content')?.textContent || '',
+                x: parseInt(node.style.left, 10) || 0,
+                y: parseInt(node.style.top, 10) || 0,
+                width: node.offsetWidth,
+                height: node.offsetHeight,
+                color: originalNode?.color || null
+            };
+        });
+
+        output.value = JSON.stringify(canvasJsonData, null, 2);
+    }
+
+    function applyPanAndZoom() {
+        const previewContainer = jsonCanvasPreview.closest('.preview-container');
+        const canvasNodes = previewContainer.querySelector('.canvas-nodes');
+        if (canvasNodes) {
+            canvasNodes.style.transform = `translate(${panOffsetX}px, ${panOffsetY}px) scale(${scale})`;
+        }
+    }
+
+    function adjustCanvasToViewport() {
+        const previewContainer = jsonCanvasPreview.closest('.preview-container');
+        const canvasNodes = previewContainer?.querySelector('.canvas-nodes');
+        if (!canvasNodes) return;
+
+        const nodes = canvasNodes.querySelectorAll('.canvas-node');
+        if (nodes.length === 0) return;
+
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        nodes.forEach(node => {
+            const x = parseInt(node.style.left, 10) || 0;
+            const y = parseInt(node.style.top, 10) || 0;
+            minX = Math.min(minX, x);
+            maxX = Math.max(maxX, x + node.offsetWidth);
+            minY = Math.min(minY, y);
+            maxY = Math.max(maxY, y + node.offsetHeight);
+        });
+
+        const boundingBoxWidth = maxX - minX;
+        const boundingBoxHeight = maxY - minY;
+        const viewportWidth = previewContainer?.clientWidth || window.innerWidth;
+        const viewportHeight = previewContainer?.clientHeight || window.innerHeight;
+
+        const scaleX = viewportWidth / (boundingBoxWidth + 100);
+        const scaleY = viewportHeight / (boundingBoxHeight + 100);
+        scale = Math.min(scaleX, scaleY, 1);
+
+        panOffsetX = (viewportWidth - boundingBoxWidth * scale) / 2 - minX * scale;
+        panOffsetY = (viewportHeight - boundingBoxHeight * scale) / 2 - minY * scale;
+
+        applyPanAndZoom();
+    }
+
+    function renderJsonCanvasPreview(jsonCanvas) {
         try {
-            const nodes = canvasJson.nodes || [];
-            const edges = canvasJson.edges || [];
+            canvasJsonData = JSON.parse(JSON.stringify(jsonCanvas));
+            const nodes = canvasJsonData.nodes || [];
+            const edges = canvasJsonData.edges || [];
 
             if (nodes.length === 0) {
                 jsonCanvasPreview.innerHTML = '<em>No nodes to display</em>';
@@ -396,73 +555,153 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            const padding = 40;
-            const nodeWidth = 200;
-            const nodeHeight = 60;
+            jsonCanvasPreview.innerHTML = `
+                <div class="canvas-container">
+                    <div class="canvas-nodes">
+                        <svg class="canvas-edges"></svg>
+                    </div>
+                    <div class="canvas-controls">
+                        <button class="canvas-btn" id="canvas-dir-toggle" title="Toggle direction (TD/LR)">↔</button>
+                        <button class="canvas-btn" id="canvas-zoom-in" title="Zoom in">+</button>
+                        <button class="canvas-btn" id="canvas-zoom-out" title="Zoom out">-</button>
+                        <button class="canvas-btn" id="canvas-zoom-reset" title="Reset">⟲</button>
+                    </div>
+                </div>
+            `;
 
-            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-            nodes.forEach(node => {
-                minX = Math.min(minX, node.x);
-                minY = Math.min(minY, node.y);
-                maxX = Math.max(maxX, node.x + (node.width || nodeWidth));
-                maxY = Math.max(maxY, node.y + (node.height || nodeHeight));
-            });
+            const container = jsonCanvasPreview;
+            const canvasNodes = container.querySelector('.canvas-nodes');
+            const svgContainer = container.querySelector('.canvas-edges');
 
-            const width = maxX - minX + padding * 2;
-            const height = maxY - minY + padding * 2;
-            const offsetX = -minX + padding;
-            const offsetY = -minY + padding;
-
-            let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" style="background: transparent">
-            <style>
-                .node { fill: var(--card-bg, #ffffff); stroke: var(--accent-color, #4f46e5); stroke-width: 2; }
-                .node-text { fill: var(--text-color, #374151); font-family: inherit; }
-                .edge { stroke: var(--text-color, #6b7280); stroke-width: 2; fill: none; }
-                .edge-label-bg { fill: var(--code-bg, #f3f4f6); stroke: var(--border-color, #d1d5db); stroke-width: 1; }
-                .edge-label { fill: var(--text-color, #374151); font-family: inherit; }
-            </style>`;
-            svg += `<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--text-color, #6b7280)"/></marker></defs>`;
-
-            edges.forEach(edge => {
-                const fromNode = nodes.find(n => n.id === edge.fromNode);
-                const toNode = nodes.find(n => n.id === edge.toNode);
-                if (fromNode && toNode) {
-                    const x1 = (fromNode.x + (fromNode.width || nodeWidth) / 2) + offsetX;
-                    const y1 = (fromNode.y + (fromNode.height || nodeHeight) / 2) + offsetY;
-                    const x2 = (toNode.x + (toNode.width || nodeWidth) / 2) + offsetX;
-                    const y2 = (toNode.y + (toNode.height || nodeHeight) / 2) + offsetY;
-
-                    const midX = (x1 + x2) / 2;
-                    const midY = (y1 + y2) / 2;
-
-                    svg += `<path class="edge" d="M${x1},${y1} L${x2},${y2}" marker-end="url(#arrowhead)"/>`;
-                    if (edge.label) {
-                        const labelWidth = edge.label.length * 8 + 16;
-                        const labelHeight = 18;
-                        svg += `<rect class="edge-label-bg" x="${midX - labelWidth/2}" y="${midY - labelHeight/2 - 4}" width="${labelWidth}" height="${labelHeight}" rx="3"/>`;
-                        svg += `<text class="edge-label" x="${midX}" y="${midY - 4}" dominant-baseline="middle">${edge.label}</text>`;
-                    }
-                }
-            });
+            svgContainer.style.position = 'absolute';
+            svgContainer.style.top = '0';
+            svgContainer.style.left = '0';
+            svgContainer.style.width = '10000px';
+            svgContainer.style.height = '10000px';
+            svgContainer.style.pointerEvents = 'none';
+            svgContainer.style.zIndex = '1';
+            svgContainer.style.overflow = 'visible';
 
             nodes.forEach(node => {
-                const x = node.x + offsetX;
-                const y = node.y + offsetY;
-                const w = node.width || nodeWidth;
-                const h = node.height || nodeHeight;
-                const color = node.color ? `hsl(${node.color * 60}, 70%, 50%)` : '';
+                const nodeEl = document.createElement('div');
+                nodeEl.className = 'canvas-node';
+                nodeEl.setAttribute('data-node-id', node.id);
+                nodeEl.style.left = `${node.x}px`;
+                nodeEl.style.top = `${node.y}px`;
+                nodeEl.style.width = `${node.width}px`;
+                nodeEl.style.height = `${node.height}px`;
 
-                if (color) {
-                    svg += `<rect class="node" x="${x}" y="${y}" width="${w}" height="${h}" rx="8" style="fill: ${color}"/>`;
-                } else {
-                    svg += `<rect class="node" x="${x}" y="${y}" width="${w}" height="${h}" rx="8"/>`;
+                if (node.color) {
+                    nodeEl.style.background = `hsl(${node.color * 60}, 70%, 50%)`;
                 }
-                svg += `<text class="node-text" x="${x + w/2}" y="${y + h/2}" dominant-baseline="middle">${node.text}</text>`;
+
+                nodeEl.innerHTML = `<div class="node-text-content">${node.text}</div>`;
+                canvasNodes.appendChild(nodeEl);
             });
 
-            svg += '</svg>';
-            jsonCanvasPreview.innerHTML = svg;
+            adjustCanvasToViewport();
+            drawEdges(container);
             jsonCanvasPreview.closest('.preview-container').classList.add('has-content');
+
+            container.querySelector('#canvas-zoom-in')?.addEventListener('click', () => {
+                scale = Math.min(scale + ZOOM_SPEED, maxScale);
+                applyPanAndZoom();
+            });
+
+            container.querySelector('#canvas-zoom-out')?.addEventListener('click', () => {
+                scale = Math.max(scale - ZOOM_SPEED, minScale);
+                applyPanAndZoom();
+            });
+
+            container.querySelector('#canvas-zoom-reset')?.addEventListener('click', adjustCanvasToViewport);
+
+            container.querySelector('#canvas-dir-toggle')?.addEventListener('click', () => {
+                currentDirection = currentDirection === 'TD' ? 'LR' : 'TD';
+                const graphData = {
+                    nodes: canvasJsonData.nodes.map(n => ({ id: n.id, label: n.text, color: n.color })),
+                    edges: canvasJsonData.edges.map(e => ({ from: e.fromNode, to: e.toNode, label: e.label })),
+                    direction: currentDirection
+                };
+                const positionedNodes = calculateLayout(graphData, currentDirection);
+                canvasJsonData.nodes = positionedNodes.map((node, i) => ({
+                    id: node.id,
+                    type: 'text',
+                    text: node.label,
+                    x: node.x,
+                    y: node.y,
+                    width: node.width,
+                    height: NODE_HEIGHT,
+                    color: node.color
+                }));
+                const nodeElements = container.querySelectorAll('.canvas-node');
+                canvasJsonData.nodes.forEach((node, i) => {
+                    if (nodeElements[i]) {
+                        nodeElements[i].style.left = `${node.x}px`;
+                        nodeElements[i].style.top = `${node.y}px`;
+                    }
+                });
+                drawEdges(container);
+                adjustCanvasToViewport();
+                output.value = JSON.stringify(canvasJsonData, null, 2);
+            });
+
+            const nodeElements = container.querySelectorAll('.canvas-node');
+            nodeElements.forEach(nodeEl => {
+                nodeEl.addEventListener('mousedown', function(e) {
+                    if (isSpacePressed) return;
+                    e.stopPropagation();
+                    isDragging = true;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    selectedElement = this;
+                    this.classList.add('is-dragging');
+                });
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (isDragging && selectedElement) {
+                    const dx = (e.clientX - startX) / scale;
+                    const dy = (e.clientY - startY) / scale;
+                    const currentLeft = parseInt(selectedElement.style.left, 10) || 0;
+                    const currentTop = parseInt(selectedElement.style.top, 10) || 0;
+                    selectedElement.style.left = `${currentLeft + dx}px`;
+                    selectedElement.style.top = `${currentTop + dy}px`;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    drawEdges(container);
+                }
+
+                if (isPanning) {
+                    panOffsetX = e.clientX;
+                    panOffsetY = e.clientY;
+                    applyPanAndZoom();
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (isDragging && selectedElement) {
+                    selectedElement.classList.remove('is-dragging');
+                    isDragging = false;
+                    selectedElement = null;
+                    updateCanvasJson();
+                }
+                if (isPanning) {
+                    isPanning = false;
+                }
+            });
+
+            container.addEventListener('wheel', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    if (e.deltaY > 0) {
+                        scale = Math.max(scale - ZOOM_SPEED, minScale);
+                    } else {
+                        scale = Math.min(scale + ZOOM_SPEED, maxScale);
+                    }
+                    applyPanAndZoom();
+                }
+            }, { passive: false });
+
         } catch (e) {
             jsonCanvasPreview.innerHTML = '<em>Preview render error</em>';
             jsonCanvasPreview.closest('.preview-container').classList.remove('has-content');
@@ -518,7 +757,21 @@ document.addEventListener('DOMContentLoaded', function() {
             fullscreenBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (container.offsetParent !== null && container.offsetWidth > 0 && container.offsetHeight > 0) {
+                    // Store original parent for restoration later
+                    container.dataset.originalParent = container.parentElement ? container.parentElement.id || '' : '';
+
+                    // Move to body for true fullscreen
+                    document.body.appendChild(container);
+                    document.body.classList.add('fullscreen-active');
+
                     container.classList.add('fullscreen');
+                    setTimeout(() => {
+                        scale = 1;
+                        panOffsetX = 0;
+                        panOffsetY = 0;
+                        applyPanAndZoom();
+                        adjustCanvasToViewport();
+                    }, 10);
                 }
             });
         }
@@ -526,22 +779,84 @@ document.addEventListener('DOMContentLoaded', function() {
         if (exitFullscreenBtn) {
             exitFullscreenBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                container.classList.remove('fullscreen');
+                exitFullscreen(container);
             });
         }
     });
 
+    function exitFullscreen(container) {
+        const originalParentId = container.dataset.originalParent;
+        let originalParent = null;
+
+        if (originalParentId) {
+            originalParent = document.getElementById(originalParentId);
+        }
+
+        // Fallback: find the original location based on content type
+        if (!originalParent) {
+            if (container.querySelector('.mermaid-preview')) {
+                const mermaidRow = document.querySelector('.mermaid-row');
+                originalParent = mermaidRow ? mermaidRow.querySelector('.panel-preview') : null;
+            } else if (container.querySelector('.json-canvas-preview')) {
+                const canvasRow = document.querySelector('.canvas-row');
+                originalParent = canvasRow ? canvasRow.querySelector('.panel-preview') : null;
+            }
+        }
+
+        if (originalParent) {
+            originalParent.appendChild(container);
+        }
+
+        container.classList.remove('fullscreen');
+        document.body.classList.remove('fullscreen-active');
+        delete container.dataset.originalParent;
+
+        setTimeout(() => {
+            scale = 1;
+            panOffsetX = 0;
+            panOffsetY = 0;
+            applyPanAndZoom();
+            adjustCanvasToViewport();
+        }, 10);
+    }
+
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             document.querySelectorAll('.preview-container.fullscreen').forEach(container => {
-                container.classList.remove('fullscreen');
+                exitFullscreen(container);
             });
         }
     });
 
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('preview-container') && e.target.classList.contains('fullscreen')) {
-            e.target.classList.remove('fullscreen');
+            exitFullscreen(e.target);
         }
     });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && !isSpacePressed) {
+            isSpacePressed = true;
+            document.body.classList.add('will-pan');
+        }
+    });
+
+    document.addEventListener('keyup', (e) => {
+        if (e.code === 'Space') {
+            isSpacePressed = false;
+            document.body.classList.remove('will-pan');
+        }
+    });
+
+    const previewContainer = jsonCanvasPreview?.closest('.preview-container');
+    if (previewContainer) {
+        previewContainer.addEventListener('mousedown', (e) => {
+            if (isSpacePressed && !e.target.closest('.canvas-node')) {
+                isPanning = true;
+                startX = e.clientX - panOffsetX;
+                startY = e.clientY - panOffsetY;
+                document.body.style.cursor = 'grabbing';
+            }
+        });
+    }
 });
